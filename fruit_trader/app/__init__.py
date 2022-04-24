@@ -1,4 +1,5 @@
 """Initialization of app."""
+from sys import prefix
 from flask import Flask
 
 def create_app():
@@ -6,6 +7,6 @@ def create_app():
     app = Flask(__name__)
     
     from fruit_trader.app.routes import api
-    app.register_blueprint(api)
+    app.register_blueprint(api, url_prefix="/fruittrader")
 
     return app
