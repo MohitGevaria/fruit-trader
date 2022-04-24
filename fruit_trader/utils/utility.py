@@ -1,5 +1,6 @@
 """Utility file for app."""
 
+
 class fruit:
     """
     The Fruit object contains a information about quantity and price of fruit.
@@ -12,7 +13,7 @@ class fruit:
         self.quantity = quantity
         self.buying_price = buying_price
 
-    
+
 class queue:
     """
     The Queue is FIFO implelented to keep track of buy and sell orders.
@@ -21,7 +22,6 @@ class queue:
         self.trading_list = []
         self.running_quantity = 0
 
-    
     def insert(self, price, quantity):
         """
         Insert data into queue.
@@ -29,9 +29,8 @@ class queue:
             price (float): Buy/Sell price of Fruit.
             quantity (int): Quantity of Fruit.
         """
-        self.trading_list.append(fruit(price,quantity))
+        self.trading_list.append(fruit(price, quantity))
         self.running_quantity += quantity
-
 
     def update(self, req_quantity, sell_price):
         """"
@@ -54,16 +53,17 @@ class queue:
                 profit += (sell_price - self.trading_list[0].buying_price) * self.trading_list[0].quantity
                 self.running_quantity -= self.trading_list[0].quantity
                 req_quantity -= self.trading_list.pop(0).quantity
-        
+
         return profit
+
 
 class database:
     """
     The database object is used to store queues for different fruits.
-    
+
     Attributes:
         data (list): map of queues to store data,
-        profit (int): Profit Value calculated after sell orders. 
+        profit (int): Profit Value calculated after sell orders.
     """
     def __init__(self):
         self.data = {}
@@ -82,10 +82,10 @@ class database:
         """
         if name not in self.data:
             self.data[name] = queue()
-        
+
         self.data[name].insert(buy_price, quantity)
 
-        return (True, "Buy Order Placed")
+        return (True, f"BOUGHT {quantity} KG {name} AT {buy_price} RUPEES/KG.")
 
     def sell_order(self, name, sell_price, quantity):
         """"
@@ -99,11 +99,11 @@ class database:
             (Status, msg)(bool, str):Returns Status and message for each status.
         """
         if name not in self.data:
-            return (False, "Fruit Not Available.")
+            return (False, f"{name} Not Available in Sufficient Quantity.")
 
         if self.data[name].running_quantity >= quantity:
             self.profit += self.data[name].update(quantity, sell_price)
-            return (True, "Sell Order Placed.")
+            return (True, f"SOLD {quantity} KG {name} AT {sell_price} RUPEES/KG.")
 
         else:
-            return (False, "Fruit Not Available in Sufficient Quantity.")
+            return (False, f"{name} Not Available in Sufficient Quantity.")

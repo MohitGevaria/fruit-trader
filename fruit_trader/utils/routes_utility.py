@@ -2,12 +2,15 @@
 
 import re
 
+
 def validations(fruit, price, quantity):
     """To perform validations on incoming data."""
-    fruit_present = re.match("\w+", fruit)
-    if fruit is None or not fruit_present:
-        return "Invalid Name for Fruit.", False
-    if  price is None:
+    fruit_present = re.search(r"[\W]+", fruit)
+    if fruit is None or fruit == "":
+        return "Fruit Name cannot be empty.", False
+    if fruit_present:
+        return "Invalid Name for Fruit. No special characters allowed.", False
+    if price is None:
         return "Price cannot be Empty."
     if not isinstance(price, float):
         return "Price should be a number.", False
