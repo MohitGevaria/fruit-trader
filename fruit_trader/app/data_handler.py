@@ -90,7 +90,7 @@ class Database:
 
         # printing in console as per requirements.
         print(f"BOUGHT {round(quantity,2)} KG {name} AT {buy_price} RUPEES/KG.")
-        return (True, f"BOUGHT {round(quantity,2)} KG {name} AT {buy_price} RUPEES/KG.")
+        return (True, f"BOUGHT {round(quantity,2)} KG {name} AT {round(buy_price,2)} RUPEES/KG.")
 
     def sell_order(self, name: str, sell_price: float, quantity: float):
         """
@@ -111,12 +111,12 @@ class Database:
 
             # printing in console as per requirements.
             print(f"SOLD {round(quantity,2)} KG {name} AT {sell_price} RUPEES/KG.")
-            return (True, f"SOLD {round(quantity,2)} KG {name} AT {sell_price} RUPEES/KG.")
+            return (True, f"SOLD {round(quantity,2)} KG {name} AT {round(sell_price, 2)} RUPEES/KG.")
 
         else:
             return (
                 False,
-                f"{name} Not Available in Sufficient Quantity. Available Quantity : {self.data[name].quantity_available}",
+                f"{name} Not Available in Sufficient Quantity. Available Quantity : {round(self.data[name].quantity_available, 2)}",
             )
 
 

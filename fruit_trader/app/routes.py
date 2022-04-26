@@ -4,6 +4,8 @@ from flask import Blueprint, request
 
 from fruit_trader.app import data_handler as dh
 from fruit_trader.app.utility import validate, tojson
+from fruit_trader.app.error_manager import BadRequestError, NotFoundError, ServerError
+
 api = Blueprint("api", __name__)
 
 # object of data strucutre used as database to store orders.
@@ -20,24 +22,27 @@ def buy_fruits():
         elif "multipart/form-data" in content_type:
             data = request.form
         else:
-            return tojson.tojson.response({"message": "Content Type not supported", "result": "error"}, 400)
+            return BadRequestError(message="Content Type not supported").to_json(), 400
+
+        if not data:
+            return NotFoundError(message="Data not found").to_json(), 404
 
         fruit = data.get("fruit", None).upper()
-        price = float(data.get("price", None))
-        quantity = float(data.get("quantity", None))
+        price = round(float(data.get("price", None)), 2)
+        quantity = round(float(data.get("quantity", None)), 2)
 
         message, status = validate.validation(fruit, price, quantity)
         if not status:
-            return tojson.response({"message": message, "result": "error"}, 400)
+            return BadRequestError(message=message).to_json(), 400
     except Exception:
-        return tojson.response({"message": "Unexpected Value Recieved", "result": "error"}, 400)
+        return BadRequestError(message="Unexpected Value Recieved").to_json(), 400
     try:
         status, message = db.buy_order(fruit, price, quantity)
         if status:
-            return tojson.response({"message": message, "result": "success"}, 201)
-        return tojson.response({"message": f"Could Not complete request due to : {message}", "result": "error"}, 400)
+            return tojson.response({"message": message, "status": "success", "status_code" : "200"}, 201)
+        return BadRequestError(message=f"Could Not complete request due to : {message}").to_json(), 400
     except Exception:
-        return tojson.response({"message": "Unexpected Error Occured", "result": "error"}, 502)
+        return ServerError(message="Unexpected Error Occured").to_json(), 502
 
 
 @api.route("/sell", methods=["POST"])
@@ -50,25 +55,29 @@ def sell_fruits():
         elif "multipart/form-data" in content_type:
             data = request.form
         else:
-            return tojson.response({"message": "Content Type not supported", "result": "error"}, 400)
+            return BadRequestError(message="Content Type not supported").to_json(), 400
+
+        if not data:
+            return NotFoundError(message="Data not found").to_json(), 404
 
         fruit = data.get("fruit", None).upper()
-        price = float(data.get("price", None))
-        quantity = float(data.get("quantity", None))
+        price = round(float(data.get("price", None)), 2)
+        quantity = round(float(data.get("quantity", None)), 2)
+
         message, status = validate.validation(fruit, price, quantity)
 
         if not status:
-            return tojson.response({"message": message, "result": "error"}, 400)
+            return BadRequestError(message=message).to_json(), 400
     except Exception:
-        return tojson.response({"message": "Unexpected Value Recieved", "result": "error"}, 400)
+        return BadRequestError(message="Unexpected Value Recieved").to_json(), 400
 
     try:
         status, message = db.sell_order(fruit, price, quantity)
         if status:
-            return tojson.response({"message": message, "result": "success"}, 201)
-        return tojson.response({"message": f"Could Not complete request due to : {message}", "result": "error"}, 400)
+            return tojson.response({"message": message, "status": "success", "status_code" : "200"}, 201)
+        return BadRequestError(message=f"Could Not complete request due to : {message}").to_json(), 400
     except Exception:
-        return tojson.response({"message": "Unexpected Error Occured", "result": "error"}, 502)
+        return ServerError(message="Unexpected Error Occured").to_json(), 502
 
 
 @api.route("/profit", methods=["GET"])
@@ -76,9 +85,9 @@ def get_profit():
     """Get Profit for overall orders."""
     try:
         profit = str(round(db.profit, 2))
-        return tojson.response({"profit": profit, "result": "success"}, 200)
+        return tojson.response({"profit": profit, "status": "success", "status_code" : "200"}, 200)
     except Exception:
-        return tojson.response({"message": "Unexpected Error Occured. Could Not Fetch Profit.", "result": "error"}, 502)
+        return ServerError(message="Unexpected Error Occured. Could Not Fetch Profit.").to_json(), 502
 
 
 @api.route("/<string:fruit>", methods=["GET"])
@@ -87,9 +96,9 @@ def get_fruit_quantity(fruit):
     try:
         if db.data.get(fruit.upper()):
             available_qty = db.data[fruit.upper()].quantity_available
-            return tojson.response({"Quantity Available": str(available_qty), "result": "success"}, 200)
+            return tojson.response({"Quantity Available": str(round(available_qty, 2)), "status": "success", "status_code" : "200"}, 200)
         else:
-            return tojson.response({"Quantity Available": str(0), "result": "success"}, 200)
+            return tojson.response({"Quantity Available": str(0), "status": "success", "status_code" : "200"}, 200)
 
     except Exception:
-        return tojson.response({"message": "Unexpected Error Occured", "result": "error"}, 502)
+        return ServerError(message="Unexpected Error Occured").to_json(), 502
