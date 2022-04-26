@@ -35,6 +35,9 @@ Then Follow the following: steps
 - Profit Endpoint
     * Available at : /fruittrader/profit [GET] 
     
+- Available Quantity Endpoint
+    * Available at : /fruittrader/<fruit_name> [GET]
+     
 **Note** : Fruit name are case-insensitive. And content-type supported are Json and Formdata.
 
 # Development Information
