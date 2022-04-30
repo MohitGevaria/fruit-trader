@@ -2,6 +2,16 @@
 
 import re
 from flask import make_response, jsonify
+from fruit_trader.app.utils.error_manager import (
+    FruitNameNotFoundError,
+    FruitNameNotValidError,
+    PriceEmptyError,
+    PriceNegativeError,
+    PriceNotValidError,
+    QuantityEmptyError,
+    QuantityNegativeError,
+    QuantityNotValidError,
+)
 
 
 class Validations:
@@ -11,25 +21,24 @@ class Validations:
         """To perform validations on incoming data."""
         fruit_present = re.search(r"[\W]+", fruit)
         if fruit is None or fruit == "":
-            return "Fruit Name cannot be empty.", False
+            raise FruitNameNotFoundError()
         if fruit_present:
-            return "Invalid Name for Fruit. No special characters allowed.", False
+            raise FruitNameNotValidError()
         if price is None:
-            return "Price cannot be Empty."
+            raise PriceEmptyError()
         if not isinstance(price, float):
-            return "Price should be a number.", False
+            raise PriceNotValidError()
         if price < 0:
-            return "Price cannot be negative.", False
+            raise PriceNegativeError()
         if quantity is None:
-            return "Quantity cannot be empty.", False
+            raise QuantityEmptyError()
         if not isinstance(quantity, float):
-            return "Quantity should be a number.", False
+            raise QuantityNotValidError()
         if quantity <= 0:
-            return "Quantity should be positive.", False
-        return "Validated", True
+            raise QuantityNegativeError()
 
 
-class ToJson():
+class ToJson:
     """Convert Response to JSON."""
 
     def response(self, data: dict, status: int, headers={}):

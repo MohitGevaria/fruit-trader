@@ -45,12 +45,19 @@ Then Follow the following: steps
 Folder Structure
 
 ```
+fruit_trader
 ├── app
 │   ├── __init__
-│   ├── routes.py
-├── utils
-│   ├── routes_utility.py
-│   ├── utility.py
+│   ├── routes
+│   │   ├── profit.py
+│   │   ├── trade_fruit.py
+│   ├── utils
+│   │   ├── common_utility.py
+│   │   ├── error_manager.py
+│   │   ├── fruit.py
+│   │   ├── print_helper.py
+│   │   ├── Singleton.py
+│   ├── data_handler.py
 ├── requirements.txt
 ├── run.py 
 └── .gitignore
