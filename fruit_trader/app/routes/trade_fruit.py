@@ -1,7 +1,7 @@
 """Routes for buy and sell."""
 from flask import Blueprint, request
 
-from fruit_trader.app import data_handler as dh
+from fruit_trader.app.utils.fruit import Fruit
 from fruit_trader.app.utils.common_utility import validate, tojson
 from fruit_trader.app.utils.error_manager import BadRequestError, Error, NotFoundError, ServerError
 from fruit_trader.app.utils.singleton import Singleton
@@ -36,7 +36,7 @@ def buy_fruits():
     except Exception:
         return BadRequestError(message="Unexpected Value Recieved").to_json(), 400
     try:
-        fruit_object = dh.Fruit(fruit, price, quantity)
+        fruit_object = Fruit(fruit, price, quantity)
         status, message = db.buy_order(fruit_object)
         if status:
             return tojson.response({"message": message, "status": "success", "status_code": "200"}, 201)
@@ -71,7 +71,7 @@ def sell_fruits():
         return BadRequestError(message="Unexpected Value Recieved").to_json(), 400
 
     try:
-        fruit_object = dh.Fruit(fruit, price, quantity)
+        fruit_object = Fruit(fruit, price, quantity)
         status, message = db.sell_order(fruit_object)
         if status:
             return tojson.response({"message": message, "status": "success", "status_code": "200"}, 201)
