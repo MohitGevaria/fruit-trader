@@ -18,4 +18,4 @@ class PrintStatus():
     @staticmethod
     def insufficient_quantity_msg(name, available_qty):
         """To Return insufficient quantity message."""
-        return f"{name} Not Available in Sufficient Quantity. Available Quantity : {available_qty}"
+        return f"{name} Not Available in Sufficient Quantity. Available Quantity : {round(available_qty, 2)}"
