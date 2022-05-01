@@ -1,40 +1,27 @@
 """Utility file for app."""
-
-
-class Fruit:
-    """
-    The Fruit object contains a information about quantity and price of fruit.
-
-    Args:
-        buying_price (float): Buying Price of fruit.
-        quantity (int): Quantity of fruit.
-    """
-
-    def __init__(self, buying_price: float, quantity: float):
-        self.quantity = quantity
-        self.buying_price = buying_price
+from fruit_trader.app.utils.fruit import Fruit
+from fruit_trader.app.utils.print_helper import PrintStatus
 
 
 class Queue:
-    """
-    The Queue is FIFO implelented to keep track of buy and sell orders.
-    """
+    """The Queue is FIFO implelented to keep track of buy and sell orders."""
 
     def __init__(self):
+        """To Initialize Queue object."""
         self.orders_list = []
         self.quantity_available = 0
 
-    def insert(self, price: float, quantity: float):
+    def insert(self, fruit: Fruit):
         """
         Insert data into queue.
         Parameters:
             price (float): Buy/Sell price of Fruit.
             quantity (int): Quantity of Fruit.
         """
-        self.orders_list.append(Fruit(price, quantity))
-        self.quantity_available += quantity
+        self.orders_list.append(fruit)
+        self.quantity_available += fruit.get_quantity()
 
-    def update(self, req_quantity: float, sell_price: float):
+    def update(self, fruit: Fruit):
         """
         Update data into queue.
         Parameters:
@@ -45,6 +32,9 @@ class Queue:
             profit(int):Profit earned after sell of Fruits.
         """
         profit = 0
+        req_quantity = fruit.get_quantity()
+        sell_price = fruit.get_price()
+
         while req_quantity > 0:
             if self.orders_list[0].quantity - req_quantity > 0:
                 profit += (sell_price - self.orders_list[0].buying_price) * req_quantity
@@ -69,10 +59,11 @@ class Database:
     """
 
     def __init__(self):
+        """To Initialize Database object."""
         self.data = {}
         self.profit = 0
 
-    def buy_order(self, name: str, buy_price: float, quantity: float):
+    def buy_order(self, fruit: Fruit):
         """
         Update data into queue.
 
@@ -83,16 +74,17 @@ class Database:
         Returns:
             (Status, msg)(bool, str):Returns Status and message for each status.
         """
-        if name not in self.data:
-            self.data[name] = Queue()
 
-        self.data[name].insert(buy_price, quantity)
+        if fruit.get_fruit_name() not in self.data:
+            self.data[fruit.get_fruit_name()] = Queue()
+
+        self.data[fruit.get_fruit_name()].insert(fruit)
 
         # printing in console as per requirements.
-        print(f"BOUGHT {round(quantity,2)} KG {name} AT {buy_price} RUPEES/KG.")
-        return (True, f"BOUGHT {round(quantity,2)} KG {name} AT {round(buy_price,2)} RUPEES/KG.")
+        print(PrintStatus.buy_response(fruit))
+        return (True, PrintStatus.buy_response(fruit))
 
-    def sell_order(self, name: str, sell_price: float, quantity: float):
+    def sell_order(self, fruit: Fruit):
         """
         Update data into queue.
 
@@ -103,38 +95,20 @@ class Database:
         Returns:
             (Status, msg)(bool, str):Returns Status and message for each status.
         """
-        if name not in self.data:
-            return (False, f"{name} Not Available in Sufficient Quantity. Available Quantity : 0")
+        if fruit.get_fruit_name() not in self.data:
+            return (False, PrintStatus.insufficient_quantity_msg(fruit.get_fruit_name(), 0))
 
-        if self.data[name].quantity_available >= quantity:
-            self.profit += self.data[name].update(quantity, sell_price)
+        if self.data[fruit.get_fruit_name()].quantity_available >= fruit.get_quantity():
+            self.profit += self.data[fruit.get_fruit_name()].update(fruit)
 
             # printing in console as per requirements.
-            print(f"SOLD {round(quantity,2)} KG {name} AT {sell_price} RUPEES/KG.")
-            return (True, f"SOLD {round(quantity,2)} KG {name} AT {round(sell_price, 2)} RUPEES/KG.")
+            print(PrintStatus.sell_response(fruit))
+            return (True, PrintStatus.sell_response(fruit))
 
         else:
             return (
                 False,
-                f"{name} Not Available in Sufficient Quantity. Available Quantity : {round(self.data[name].quantity_available, 2)}",
+                PrintStatus.insufficient_quantity_msg(
+                    fruit.get_fruit_name(), self.data[fruit.get_fruit_name()].quantity_available
+                ),
             )
-
-
-class Singleton:
-    """The Singleton class."""
-
-    __database = None
-
-    def __init__(self):
-        """Initialize database."""
-        if not Singleton.__database:
-            self.__database = Database()
-            Singleton.__database = self.__database
-
-    @staticmethod
-    def get_database_instance():
-        """Get database instance."""
-        if Singleton.__database is None:
-            Singleton()
-
-        return Singleton.__database
